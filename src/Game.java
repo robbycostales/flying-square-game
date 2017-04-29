@@ -1,17 +1,4 @@
 import java.util.Random;
-import java.util.Timer;
-
-// IDEAS:
-
-// Larger user - takes up more than one cell
-// User can shoot lasers (but not every screen update
-
-// meteors come at user - lasers turn them into "more broken" meteors - will be destroyed at some point
-//
-
-
-
-
 
 
 public class Game {
@@ -19,62 +6,75 @@ public class Game {
     private int userRow;
     private int userCol;
     private int msElapsed;
-    private int timesGet;
+
+    //scoring variables
+    private int timesGetA;
+    private int timesGetB;
+    private int timesGetC;
+    private int aVal;
+    private int bVal;
+    private int cVal;
+    // tallied when hits an object that should end the game
     private int timesAvoid;
 
     // grid dimensions
-    public static final int NUMCOL = 40;
-    public static final int NUMROW = 40;
+    private static final int NUMCOL = 70;
+    private static final int NUMROW = 35;
 
     // Screen update every ___ milliseconds
-    public static final int MIL = 50;
-    public static final int scrollSPEED = 2;
+    private static final int MIL = 50;
+    private static final int scrollSPEED = 2;
 
     // controlling keys
-    public static final int downPRESS = 40;
-    public static final int upPRESS = 38;
-    public static final int shootPRESS = 32;
+    private static final int downPRESS = 40;
+    private static final int upPRESS = 38;
+    private static final int shootPRESS = 32;
     // start on spacebar == stop
-    public static int curKEY = 32;
-    // reciprocal of new image appearance frequency
-    public static final int FREQ = 4;
+    private static int curKEY = 32;
 
     // set images
-    public String imU11 = "blue_square.gif";
-    public String imU12 = "blue_square.gif";
-    public String imU13 = "blue_square.gif";
-    public String imU21 = "blue_square.gif";
-    public String imU22 = "blue_square.gif";
-    public String imU23 = "blue_square.gif";
-    public String imU31 = "blue_square.gif";
-    public String imU32 = "blue_square.gif";
-    public String imU33 = "blue_square.gif";
-
-    public String imSHOOT = "Blank.gif" ;
-
+    private static final String imUser = "blue_square.gif";
+    private static final String imSHOOT = "Blank.gif" ;
+    private static final String imA = "coin.gif";
+    private static final String imB = "redcoin.gif";
+    private static final String imC = "bluecoin.gif";
+    private static final String imAvoid = "trippy.gif";
 
     // random variables init
-    public Random rand = new Random();
-    public int choice;
-    public int randomRow;
+    private Random rand = new Random();
+    // for out of a few
+    private static int choice;
+    // for out of 100
+    private static int probability;
+    // density
+    private static int density = 50;
 
-    public Game(int rows, int cols) {
+    private Game(int rows, int cols) {
         // grid stores and displays images
         grid = new Grid(rows, cols);
         // userRow keeps track of user's row on left edge of grid
         userRow = 2;
         // userCol keeps track of user's col
         userCol = 2;
+
         // since start of game
         msElapsed = 0;
-        timesGet = 0;
+        timesGetA = 0;
+        timesGetB = 0;
+        timesGetC = 0;
+        // values for each A, B, C object
+        aVal = 50;
+        bVal = 75;
+        cVal = 750;
+
         timesAvoid = 0;
         updateTitle();
         redrawUser(userRow, userCol, userRow, userCol);
     }
 
     // main game method
-    public void play() {
+    private void play() {
+        // during game:
         while (!isGameOver()) {
             grid.pause(MIL);
             handleKeyPress();
@@ -82,36 +82,71 @@ public class Game {
                 scrollLeft();
                 handleProjectiles();
                 populateRightEdge();
+                redrawUser(userRow, userCol, userRow, userCol);
             }
             updateTitle();
             msElapsed += 100;
         }
+        // after game:
+        grid.frameExit();
+        test();
+        // open menu
     }
 
-    public void redrawUser(int prevRow, int prevCol, int newRow, int newCol){
-        // deletes in previous position
-        grid.setImage(new Location(prevRow, prevCol), null);
-        grid.setImage(new Location(prevRow+1, prevCol), null);
-        grid.setImage(new Location(prevRow-1, prevCol), null);
-        grid.setImage(new Location(prevRow, prevCol+1), null);
-        grid.setImage(new Location(prevRow+1, prevCol+1), null);
-        grid.setImage(new Location(prevRow-1, prevCol+1), null);
-        grid.setImage(new Location(prevRow, prevCol-1), null);
-        grid.setImage(new Location(prevRow+1, prevCol-1), null);
-        grid.setImage(new Location(prevRow-1, prevCol-1), null);
+    // handles user collisions
+    private void redrawUser(int prevRow, int prevCol, int newRow, int newCol){
+        int i, j;
+        // deletes in previous position - ALWAYS SHOULD HAPPEN
+        for (i = -1; i <=1; ++i){
+            for (j = -1; j <=1; ++j){
+                if (!(grid.getImage(new Location(newRow+i, newCol+j)) == null)){
+                    switch (grid.getImage(new Location(newRow+i, newCol+j))) {
+                        case imAvoid:
+                            timesAvoid += 1;
+                            break;
+                        case imA:
+                            timesGetA += 1;
+                            break;
+                        case imB:
+                            timesGetB += 1;
+                            break;
+                        case imC:
+                            timesGetC += 1;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                grid.setImage(new Location(prevRow+i, prevCol+j), null);
+            }
+        }
         // creates in new position
-        grid.setImage(new Location(newRow-1, newCol-1), imU11);
-        grid.setImage(new Location(newRow-1, newCol), imU12);
-        grid.setImage(new Location(newRow-1, newCol+1), imU13);
-        grid.setImage(new Location(newRow, newCol-1), imU21);
-        grid.setImage(new Location(newRow, newCol), imU22);
-        grid.setImage(new Location(newRow, newCol+1), imU23);
-        grid.setImage(new Location(newRow+1, newCol-1), imU31);
-        grid.setImage(new Location(newRow+1, newCol), imU32);
-        grid.setImage(new Location(newRow+1, newCol+1), imU33);
+        for (i = -1; i <=1; ++i){
+            for (j = -1; j <=1; ++j){
+                if (!(grid.getImage(new Location(newRow+i, newCol+j)) == null)){
+                    switch (grid.getImage(new Location(newRow+i, newCol+j))) {
+                        case imAvoid:
+                            timesAvoid += 1;
+                            break;
+                        case imA:
+                            timesGetA += 1;
+                            break;
+                        case imB:
+                            timesGetB += 1;
+                            break;
+                        case imC:
+                            timesGetC += 1;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                grid.setImage(new Location(newRow+i, newCol+j), imUser);
+            }
+        }
     }
 
-    public void moveBULLET(int prevRow, int prevCol, int newRow, int newCol){
+    private void moveBULLET(int prevRow, int prevCol, int newRow, int newCol){
         grid.setImage(new Location(prevRow, prevCol), null);
         grid.setImage(new Location(prevRow, prevCol-1), null);
 
@@ -121,7 +156,7 @@ public class Game {
         }
     }
 
-    public void handleProjectiles(){
+    private void handleProjectiles(){
         int i, j;
         for(i = NUMROW - 1; i >= 0 ; i--) {
             for (j = NUMCOL -1; j >= 0; j--) {
@@ -133,12 +168,7 @@ public class Game {
         }
     }
 
-    spawnEnemy
-
-
-
-    public void handleKeyPress()
-    {
+    private void handleKeyPress() {
         int key = grid.checkLastKeyPressed();
 
         if (key == shootPRESS){
@@ -148,33 +178,39 @@ public class Game {
         if (key != -1 && key != shootPRESS){
             curKEY = key;
         }
-
-        System.out.println(key);
-        switch(curKEY)
-        {
+        switch(curKEY) {
+            // if up-key
             case upPRESS:
-                if(userRow < 2)
-                {
+                // if at top of screen
+                if(userRow < 2) {
                     break;
-                } else
-                {
-//                    grid.setImage(new Location(userRow, userCol), null);
-//                    userRow -= 1;
-//                    grid.setImage(new Location(userRow, userCol), "user.gif");
+                // if running into object to avoid
+                } else if (grid.getImage(new Location(userRow-1, userCol)) == imAvoid ||
+                        grid.getImage(new Location(userRow-1, userCol+1)) == imAvoid ||
+                        grid.getImage(new Location(userRow-1, userCol-1)) == imAvoid){
+                    System.out.println("up error");
+                    timesAvoid +=1;
+                    redrawUser(userRow, userCol, userRow-1, userCol);
+                    userRow -= 1;
+                } else {
                     redrawUser(userRow, userCol, userRow-1, userCol);
                     userRow -= 1;
                 }
                 break;
             // if down-key
             case downPRESS:
-                if(userRow > NUMROW-3)
-                {
+                // if at bottom of screen
+                if(userRow > NUMROW-3) {
                     break;
-                } else
-                {
-//                    grid.setImage(new Location(userRow, userCol), null);
-//                    userRow += 1;
-//                    grid.setImage(new Location(userRow, userCol), "user.gif");
+                // if running into object to avoid
+                } else if (grid.getImage(new Location(userRow+1, userCol)) == imAvoid ||
+                        grid.getImage(new Location(userRow+1, userCol+1)) == imAvoid ||
+                        grid.getImage(new Location(userRow+1, userCol-1)) == imAvoid){
+                    System.out.println("down error");
+                    timesAvoid +=1;
+                    redrawUser(userRow, userCol, userRow+1, userCol);
+                    userRow += 1;
+                } else {
                     redrawUser(userRow, userCol, userRow+1, userCol);
                     userRow += 1;
                 }
@@ -184,46 +220,58 @@ public class Game {
         }
     }
 
-    public void populateRightEdge()
-    {
-        choice = rand.nextInt(FREQ);
-        // bound includes 0 to NUMCOL-1
-        randomRow = rand.nextInt(NUMCOL);
-        switch(choice)
-        {
-            case 0:
-                grid.setImage(new Location(randomRow, NUMCOL-1), "avoid.gif");
-                break;
-            case 1:
-                grid.setImage(new Location(randomRow, NUMCOL-1), "get.gif");
-                break;
-            default:
-                break;
+    private void populateRightEdge() {
+        int i;
+        for ( i = 1; i <= NUMROW -2; ++i ){
+            probability = rand.nextInt(100);
+            choice = rand.nextInt(50);
+            if (choice == 0) {
+                if (0 <= probability && probability < 50) {
+                    // create avoid
+                    grid.setImage(new Location(i, NUMCOL-2), imAvoid);
+                } else if (50 <= probability && probability < 80){
+                    // create imA
+                    grid.setImage(new Location(i, NUMCOL-2), imA);
+                } else if (80 <= probability && probability < 99){
+                    // create imB
+                    grid.setImage(new Location(i, NUMCOL-2), imB);
+                }
+                else if (99 <= probability && probability < 100){
+                    // create imC
+                    grid.setImage(new Location(i, NUMCOL-2), imC);
+                }
+            }
         }
     }
 
-    public void scrollLeft(){
+    private void scrollLeft(){
         int i, j;
+        // goes through all points on screen
         for(i = 0; i < NUMROW; i++){
             for (j = 0; j < NUMCOL; j++){
                 // if at way left of screen, it disappears
                 if (j == 0) {
-                    // if not the user
-                    if (!("user.gif").equals(grid.getImage(new Location(i, j)))) {
-                        // make disappear
-                        grid.setImage(new Location(i, j), null);
-                    }
+                    grid.setImage(new Location(i, j), null);
+                // if the location is null, we don't need to do anything
                 } else if (grid.getImage(new Location(i, j)) == null) {
-                    continue;
+                // if not null, and not at way left:
                 } else {
                     switch (grid.getImage(new Location(i, j))) {
-                        case "get.gif":
+                        case imAvoid:
                             grid.setImage(new Location(i, j), null);
-                            grid.setImage(new Location(i, j - 1), "get.gif");
+                            grid.setImage(new Location(i, j - 1), imAvoid);
                             break;
-                        case "avoid.gif":
+                        case imA:
                             grid.setImage(new Location(i, j), null);
-                            grid.setImage(new Location(i, j - 1), "avoid.gif");
+                            grid.setImage(new Location(i, j - 1), imA);
+                            break;
+                        case imB:
+                            grid.setImage(new Location(i, j), null);
+                            grid.setImage(new Location(i, j - 1), imB);
+                            break;
+                        case imC:
+                            grid.setImage(new Location(i, j), null);
+                            grid.setImage(new Location(i, j - 1), imC);
                             break;
                         default:
                             break;
@@ -233,22 +281,28 @@ public class Game {
         }
     }
 
-    public void handleCollision(Location loc) {
+    private int getScore() {
+        // dot product of values of objects and the amount of times each has been collected
+        return aVal*timesGetA + bVal*timesGetB + cVal*timesGetC + getTime()*5;
     }
 
-    public int getScore() {
-        return 0;
+    private int getTime() {
+        return msElapsed / 1000;
     }
 
-    public void updateTitle() {
-        grid.setTitle("Game:  " + getScore());
+    private void updateTitle() {
+        grid.setTitle("Game:  " + getScore() + " points" + "   |   Duration: " + getTime() + " seconds" );
     }
 
-    public boolean isGameOver() {
-        return false;
+    private boolean isGameOver() {
+        if (timesAvoid < 1) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
-    public static void test() {
+    private static void test() {
         Game game = new Game(NUMROW, NUMCOL);
         game.play();
     }

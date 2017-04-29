@@ -127,6 +127,11 @@ public class Grid extends JComponent implements KeyListener, MouseListener {
         //ignore
     }
 
+    public void frameExit() {
+        frame.setVisible(false);
+        frame.dispose();
+    }
+
     private static java.awt.Color toJavaColor(Color color) {
         return new java.awt.Color(color.getRed(), color.getGreen(), color.getBlue());
     }
