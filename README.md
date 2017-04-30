@@ -1,22 +1,22 @@
 # BLUE BLINKING BLOCK BLAST
 
-# Current State of Game
-Features:
-    * Avoid the gray blocks
-    * Survive as long as possible to earn the most points
-    * Collect coins to earn more points
-        - from most valuable to least: Blue, Red, Yellow
-    * Shoot stuff
-        - sometimes will destroy the blocks to avoid
-    * The game gets harder as time passes
-        - the density of material increases as time goes on (just like school--fun, right?)
+
+# Features:
+* Avoid the gray blocks
+* Survive as long as possible to earn the most points
+* Collect coins to earn more points
+    - from most valuable to least: Blue, Red, Yellow
+* Shoot stuff
+    - sometimes will destroy the blocks to avoid
+* The game gets harder as time passes
+    - the density of material increases as time goes on (just like school--fun, right?)
 
 
 # Features to Implement
-    * Levels / modes
-        - fight bosses in between long stretches of the normal mode
-    * Deal gradual damage to blocks
-    * Diversity in rock formations
+* Levels / modes
+    - fight bosses in between long stretches of the normal mode
+* Deal gradual damage to blocks
+* Diversity in rock formations
 
 
 
