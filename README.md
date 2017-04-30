@@ -12,7 +12,7 @@
     - the density of material increases as time goes on (just like school--fun, right?)
 
 
-# Features to Implement
+# Features to Implement:
 * Levels / modes
     - fight bosses in between long stretches of the normal mode
 * Deal gradual damage to blocks
