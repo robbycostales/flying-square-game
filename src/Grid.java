@@ -24,6 +24,7 @@ public class Grid extends JComponent implements KeyListener, MouseListener {
         setTitle(imageFileName);
     }
 
+
     private BufferedImage loadImage(String imageFileName) {
         URL url = getClass().getResource(imageFileName);
         if (url == null)
@@ -56,6 +57,7 @@ public class Grid extends JComponent implements KeyListener, MouseListener {
 
         frame = new JFrame("Grid");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
         frame.addKeyListener(this);
 
         int cellSize = Math.max(Math.min(500 / getNumRows(), 500 / getNumCols()), 1);
@@ -65,6 +67,8 @@ public class Grid extends JComponent implements KeyListener, MouseListener {
 
         frame.pack();
         frame.setVisible(true);
+
+        new MenuBar(frame);
     }
 
     private void showImage(BufferedImage image) {

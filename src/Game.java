@@ -2,10 +2,10 @@ import java.util.Random;
 
 
 public class Game {
-    private Grid grid;
-    private int userRow;
-    private int userCol;
-    private int msElapsed;
+    public Grid grid;
+    public int userRow;
+    public int userCol;
+    public int msElapsed;
 
     //scoring variables
     private int timesGetA;
@@ -18,8 +18,8 @@ public class Game {
     private int timesAvoid;
 
     // grid dimensions
-    private static final int NUMCOL = 70;
-    private static final int NUMROW = 35;
+    public static final int NUMCOL = 70;
+    public static final int NUMROW = 35;
 
     // Screen update every ___ milliseconds
     private static final int MIL = 50;
@@ -46,16 +46,19 @@ public class Game {
     private static int choice;
     // for out of 100
     private static int probability;
-    // density
-    private static int density = 50;
+    // density of stuff (larger = less dense)
+    private static int density;
 
-    private Game(int rows, int cols) {
+    public Game(int rows, int cols) {
         // grid stores and displays images
         grid = new Grid(rows, cols);
         // userRow keeps track of user's row on left edge of grid
         userRow = 2;
         // userCol keeps track of user's col
         userCol = 2;
+
+        density = 50;
+
 
         // since start of game
         msElapsed = 0;
@@ -73,7 +76,7 @@ public class Game {
     }
 
     // main game method
-    private void play() {
+    public void play() {
         // during game:
         while (!isGameOver()) {
             grid.pause(MIL);
@@ -86,11 +89,13 @@ public class Game {
             }
             updateTitle();
             msElapsed += 100;
+            if (msElapsed % 30000 == 0){
+                density -= 2;
+            }
         }
-        // after game:
-        grid.frameExit();
-        test();
-        // open menu
+        grid.pause(3000); // Three seconds between games
+        grid.frameExit(); // exits current frame
+        test(); // starts new game
     }
 
     // handles user collisions
@@ -224,7 +229,7 @@ public class Game {
         int i;
         for ( i = 1; i <= NUMROW -2; ++i ){
             probability = rand.nextInt(100);
-            choice = rand.nextInt(50);
+            choice = rand.nextInt(density);
             if (choice == 0) {
                 if (0 <= probability && probability < 50) {
                     // create avoid
@@ -302,7 +307,7 @@ public class Game {
         }
     }
 
-    private static void test() {
+    public static void test() {
         Game game = new Game(NUMROW, NUMCOL);
         game.play();
     }
