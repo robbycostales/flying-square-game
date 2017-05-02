@@ -34,7 +34,7 @@ public class Game {
 
     // set images
     private static final String imUser = "blue_square.gif";
-    private static final String imSHOOT = "Blank.gif" ;
+    private static final String imSHOOT = "laser.gif" ;
     private static final String imA = "coin.gif";
     private static final String imB = "redcoin.gif";
     private static final String imC = "bluecoin.gif";
@@ -154,7 +154,6 @@ public class Game {
     private void moveBULLET(int prevRow, int prevCol, int newRow, int newCol){
         grid.setImage(new Location(prevRow, prevCol), null);
         grid.setImage(new Location(prevRow, prevCol-1), null);
-
         if (newCol < NUMCOL){
             grid.setImage(new Location(newRow, newCol), imSHOOT);
             grid.setImage(new Location(newRow, newCol-1), imSHOOT);
@@ -166,6 +165,10 @@ public class Game {
         for(i = NUMROW - 1; i >= 0 ; i--) {
             for (j = NUMCOL -1; j >= 0; j--) {
                 if (grid.getImage(new Location(i, j)) == imSHOOT){
+                    if (j < NUMCOL-1 && grid.getImage(new Location (i, j+1)) == imAvoid)
+                    {
+                        grid.setImage(new Location(i,j+1), null);
+                    }
                     // j-1 because we found the right pixel, and need to consider the left
                     moveBULLET(i, j, i, j+4);
                 }
@@ -228,7 +231,7 @@ public class Game {
     private void populateRightEdge() {
         int i;
         for ( i = 1; i <= NUMROW -2; ++i ){
-            probability = rand.nextInt(100);
+            probability = rand.nextInt(150);
             choice = rand.nextInt(density);
             if (choice == 0) {
                 if (0 <= probability && probability < 50) {
