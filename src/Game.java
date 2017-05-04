@@ -34,7 +34,7 @@ public class Game {
 
     // set images
     private static final String imUser = "blue_square.gif";
-    private static final String imSHOOT = "laser.gif" ;
+    private static final String imSHOOT = "Laser_Bullet.gif" ;
     private static final String imA = "coin.gif";
     private static final String imB = "redcoin.gif";
     private static final String imC = "bluecoin.gif";
